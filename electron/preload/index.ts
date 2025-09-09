@@ -115,4 +115,13 @@ window.onmessage = (ev) => {
   ev.data.payload === 'removeLoading' && removeLoading()
 }
 
+contextBridge.exposeInMainWorld('electronAPI', {
+  getDownloads: () => ipcRenderer.invoke('get-downloads'),
+  getVideoPath: (filename: string) => ipcRenderer.invoke("getVideoPath", filename),
+  addVideo: (data: { filename: string; slug: string }) => ipcRenderer.invoke("addVideo", data),
+  getVideos: () => ipcRenderer.invoke("getVideos"),
+  updateFlags: (data: { slug: string; tiktok?: boolean; instagram?: boolean; youtube?: boolean }) =>
+    ipcRenderer.invoke("updateFlags", data),
+});
+
 setTimeout(removeLoading, 4999)

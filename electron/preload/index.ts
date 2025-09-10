@@ -122,6 +122,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getVideos: () => ipcRenderer.invoke("getVideos"),
   updateFlags: (data: { slug: string; tiktok?: boolean; instagram?: boolean; youtube?: boolean }) =>
     ipcRenderer.invoke("updateFlags", data),
+  publishTikTok: (data: { filename: string; accessToken: string }) =>
+    ipcRenderer.invoke("publishTikTok", data),
+  loginTikTok: () => ipcRenderer.invoke("tiktok:login"),
 });
 
 setTimeout(removeLoading, 4999)

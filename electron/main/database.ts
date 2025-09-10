@@ -2,7 +2,7 @@ import Database from "better-sqlite3";
 import path from "path";
 import { app } from "electron";
 
-const dbPath = path.join(app.getPath("userData"), "app.db");
+const dbPath = path.join(app.getPath("userData"), "database.db");
 const db = new Database(dbPath);
 
 // Cria tabela se não existir

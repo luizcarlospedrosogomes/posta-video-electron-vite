@@ -5,6 +5,11 @@ import path from 'node:path'
 import os from 'node:os'
 import { update } from './update'
 
+import "./ipc/tiktok";
+import "./ipc/videos";
+import "./ipc/downloads";
+import { registerTikTokIPC } from "./ipc/tiktok";
+
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 import db from "./database";
@@ -80,6 +85,7 @@ async function createWindow() {
 
   // Auto update
   update(win)
+  registerTikTokIPC(win);
 }
 
 app.whenReady().then(createWindow)
@@ -123,62 +129,10 @@ ipcMain.handle('open-win', (_, arg) => {
   }
 })
 
-import fs from 'fs';
-ipcMain.handle('get-downloads', async () => {
-  const downloadsPath = path.join(os.homedir(), 'Downloads');
-  const files = await fs.promises.readdir(downloadsPath);
-  return files.map(f => path.join(downloadsPath, f));
-});
 
 
 
-// Inserir vídeo
-ipcMain.handle("addVideo", (_event, { filename, slug }: { filename: string, slug: string }) => {
-  const stmt = db.prepare(`
-    INSERT INTO videos (filename, slug) VALUES (?, ?)
-  `);
-  try {
-    const info = stmt.run(filename, slug);
-    return info.lastInsertRowid;
-  } catch (e: any) {
-    if (e.code === "SQLITE_CONSTRAINT_UNIQUE") {
-      throw new Error("Slug já existe!");
-    }
-    throw e;
-  }
-});
-
-// Atualizar flags
-ipcMain.handle(
-  "updateFlags",
-  (_event, { slug, tiktok, instagram, youtube }: { slug: string; tiktok?: boolean; instagram?: boolean; youtube?: boolean }) => {
-    const stmt = db.prepare(`
-      UPDATE videos SET tiktok = COALESCE(?, tiktok),
-                        instagram = COALESCE(?, instagram),
-                        youtube = COALESCE(?, youtube)
-      WHERE slug = ?
-    `);
-    stmt.run(tiktok ? 1 : 0, instagram ? 1 : 0, youtube ? 1 : 0, slug);
-    return true;
-  }
-);
-
-// Listar vídeos
-ipcMain.handle("getVideos", () => {
-  const rows = db.prepare("SELECT * FROM videos ORDER BY created_at DESC").all();
-  return rows;
-});
 
 
-// Lista arquivos de vídeo na pasta Downloads
-ipcMain.handle("getDownloads", async () => {
-  const downloadsPath = app.getPath("downloads");
-  const files = await fs.promises.readdir(downloadsPath);
-  return files.filter(f => f.endsWith(".mp4") || f.endsWith(".mov"));
-});
 
-// Retorna caminho completo do arquivo
-ipcMain.handle("getVideoPath", async (_event, filename: string) => {
-  const downloadsPath = app.getPath("downloads");
-  return path.join(downloadsPath, filename);
-});
+

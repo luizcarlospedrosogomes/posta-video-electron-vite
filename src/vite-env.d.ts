@@ -16,6 +16,8 @@ interface Window {
       created_at: string;
     }[]>;
     updateFlags: (data: { slug: string; tiktok?: boolean; instagram?: boolean; youtube?: boolean }) => Promise<boolean>;
+    publishTikTok: (data: { filename: string; accessToken: string }) => Promise<void>;
+    loginTikTok: () => Promise<void>;
 
   };
 }

@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { generateSlug } from "./utils";
 
@@ -13,13 +14,13 @@ interface Video {
 
 export default function VideoGallery() {
   const [videos, setVideos] = useState<Video[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadVideos = async () => {
-      // 1️⃣ listar vídeos na pasta Downloads
-      const files: string[] = await window.electronAPI.getDownloads();
-
-      // 2️⃣ salvar cada vídeo no banco (se ainda não existir)
+ 
+      let files: string[] = await window.electronAPI.getDownloads();
+      files = files.filter(f => f.toLowerCase().endsWith(".mp4"));
       for (const f of files) {
         const slug = generateSlug(f);
         try {
@@ -57,9 +58,10 @@ export default function VideoGallery() {
             controls
             style={{ width: "100%", marginBottom: "8px" }}
             src={video.filename}
+            
           />
-          <div>
-            <strong>{video.filename}</strong>
+          <div onClick={() => navigate(`/video/${video.slug}`)}>
+            <strong>{video.slug}</strong>          
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: "8px" }}>
             <label>
